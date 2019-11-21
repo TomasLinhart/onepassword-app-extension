@@ -208,9 +208,13 @@ static NSString *const AppExtensionWebViewPageDetails = @"pageDetails";
 - (void)fillItemIntoWebView:(nonnull id)webView forViewController:(nonnull UIViewController *)viewController sender:(nullable id)sender showOnlyLogins:(BOOL)yesOrNo completion:(nonnull OnePasswordSuccessCompletionBlock)completion {
 	NSAssert(webView != nil, @"webView must not be nil");
 	NSAssert(viewController != nil, @"viewController must not be nil");
+#if defined(__IPHONE_8_0) && !TARGET_OS_MACCATALYST
 	NSAssert([webView isKindOfClass:[UIWebView class]] || [webView isKindOfClass:[WKWebView class]], @"webView must be an instance of WKWebView or UIWebView.");
+#else
+    NSAssert([webView isKindOfClass:[WKWebView class]], @"webView must be an instance of WKWebView.");
+#endif
 
-#ifdef __IPHONE_8_0
+#if defined(__IPHONE_8_0) && !TARGET_OS_MACCATALYST
 	if ([webView isKindOfClass:[UIWebView class]]) {
 		[self fillItemIntoUIWebView:webView webViewController:viewController sender:(id)sender showOnlyLogins:yesOrNo completion:^(BOOL success, NSError *error) {
 			if (completion) {
@@ -238,9 +242,13 @@ static NSString *const AppExtensionWebViewPageDetails = @"pageDetails";
 
 - (void)createExtensionItemForWebView:(nonnull id)webView completion:(nonnull OnePasswordExtensionItemCompletionBlock)completion {
 	NSAssert(webView != nil, @"webView must not be nil");
-	NSAssert([webView isKindOfClass:[UIWebView class]] || [webView isKindOfClass:[WKWebView class]], @"webView must be an instance of WKWebView or UIWebView.");
+#if defined(__IPHONE_8_0) && !TARGET_OS_MACCATALYST
+    NSAssert([webView isKindOfClass:[UIWebView class]] || [webView isKindOfClass:[WKWebView class]], @"webView must be an instance of WKWebView or UIWebView.");
+#else
+    NSAssert([webView isKindOfClass:[WKWebView class]], @"webView must be an instance of WKWebView.");
+#endif
 	
-#ifdef __IPHONE_8_0
+#if defined(__IPHONE_8_0) && !TARGET_OS_MACCATALYST
 	if ([webView isKindOfClass:[UIWebView class]]) {
 		UIWebView *uiWebView = (UIWebView *)webView;
 		NSString *collectedPageDetails = [uiWebView stringByEvaluatingJavaScriptFromString:OPWebViewCollectFieldsScript];
@@ -401,6 +409,7 @@ static NSString *const AppExtensionWebViewPageDetails = @"pageDetails";
 }
 #endif
 
+#if defined(__IPHONE_8_0) && !TARGET_OS_MACCATALYST
 - (void)fillItemIntoUIWebView:(nonnull UIWebView *)webView webViewController:(nonnull UIViewController *)viewController sender:(nullable id)sender showOnlyLogins:(BOOL)yesOrNo completion:(nonnull OnePasswordSuccessCompletionBlock)completion {
 	NSString *collectedPageDetails = [webView stringByEvaluatingJavaScriptFromString:OPWebViewCollectFieldsScript];
 	[self findLoginIn1PasswordWithURLString:webView.request.URL.absoluteString collectedPageDetails:collectedPageDetails forWebViewController:viewController sender:sender withWebView:webView showOnlyLogins:yesOrNo completion:^(BOOL success, NSError *error) {
@@ -409,6 +418,7 @@ static NSString *const AppExtensionWebViewPageDetails = @"pageDetails";
 		}
 	}];
 }
+#endif
 
 - (void)executeFillScript:(NSString * __nullable)fillScript inWebView:(nonnull id)webView completion:(nonnull OnePasswordSuccessCompletionBlock)completion {
 
@@ -424,7 +434,7 @@ static NSString *const AppExtensionWebViewPageDetails = @"pageDetails";
 	NSMutableString *scriptSource = [OPWebViewFillScript mutableCopy];
 	[scriptSource appendFormat:@"(document, %@, undefined);", fillScript];
 
-#ifdef __IPHONE_8_0
+#if defined(__IPHONE_8_0) && !TARGET_OS_MACCATALYST
 	if ([webView isKindOfClass:[UIWebView class]]) {
 		NSString *result = [((UIWebView *)webView) stringByEvaluatingJavaScriptFromString:scriptSource];
 		BOOL success = (result != nil);
@@ -503,7 +513,7 @@ static NSString *const AppExtensionWebViewPageDetails = @"pageDetails";
 }
 
 - (UIActivityViewController *)activityViewControllerForItem:(nonnull NSDictionary *)item viewController:(nonnull UIViewController*)viewController sender:(nullable id)sender typeIdentifier:(nonnull NSString *)typeIdentifier {
-#ifdef __IPHONE_8_0
+#if defined(__IPHONE_8_0) && !TARGET_OS_MACCATALYST
 	NSAssert(NO == (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad && sender == nil), @"sender must not be nil on iPad.");
 
 	NSItemProvider *itemProvider = [[NSItemProvider alloc] initWithItem:item typeIdentifier:typeIdentifier];
